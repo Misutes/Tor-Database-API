@@ -3,10 +3,10 @@
 2. Install pipenv (shell command):
     * `pip install pipenv`
 3. Install requirements (shell command):
-    * `pipen install`
+    * `pipenv install`
 4. Set env variables:
     * Open file `.env`
-    * Set DATABASE_PATH (at the end should be '\')
+    * Set DATABASE_PATH (at the end should be '\\')
     * Set DATABASE_NAME
 5. Run the app (shell command):
 * Important! You should be at `src` directory
