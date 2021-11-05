@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+inject = "*"
+fastapi = "*"
+peewee = "*"
+python-dotenv = "*"
+environs = "*"
+requests = "*"
+pysqlite3 = "*"
+uvicorn = "*"
+flake8 = "*"
+pylama = "*"
+mypy = "*"
+jinja2 = "*"
+python-multipart = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
