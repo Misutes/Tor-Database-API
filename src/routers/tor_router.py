@@ -4,6 +4,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse, FileResponse
 
+from models import UpdatedEmails
 from services.tor_service import get_service, TorService
 
 router = APIRouter()
@@ -30,18 +31,17 @@ async def get_users(
 
 @router.put("/updateUsers")
 async def update_users(
-        email: List[str],
-        state: int,
+        data: UpdatedEmails,
         service: TorService = Depends(tor_service)
 ):
-    if state not in (0, 1, 2):
+    if data.state not in (0, 1, 2):
         return JSONResponse(
             status_code=400,
             content='invalid state'
         )
 
     msg = "emails were updated"
-    if invalid_emails := await service.update_user(email, state):
+    if invalid_emails := await service.update_users(data.emails, data.state):
         msg = f"emails: {invalid_emails} wasn't updated"
 
     return JSONResponse(

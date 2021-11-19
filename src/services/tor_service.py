@@ -29,8 +29,8 @@ class TorService:
             return result
         return self._repo.count_users()
 
-    async def update_user(self, email, state):
-        return self._repo.update_users(email, state)
+    async def update_users(self, emails, state):
+        return self._repo.update_users(emails, state)
 
     async def get_register(self, count):
         if result := self._repo.get_register(count):
@@ -47,10 +47,10 @@ class TorService:
         self._repo.update_state(emails)
         return processed, emails
 
-    async def get_file(self, path, count):
+    async def get_file(self, path, count, service_number):
         remove_file(path)
 
-        result = self._repo.get_register(count)
+        result = self._repo.get_register(count, service_number)
         _, emails = await self._processed_register_email(result)
         with open("file.txt", 'w') as f:
             f.write(

@@ -28,8 +28,9 @@ async def get_page(
 @router.get("/file.txt")
 async def get_file(
         count: int,
+        service_number: str,
         service: TorService = Depends(tor_service)
 ):
     path = os.path.join(os.path.abspath(os.path.dirname("src")), 'file.txt')
-    await service.get_file(path, count)
+    await service.get_file(path, count, service_number)
     return FileResponse(path, media_type='application/octet-stream')

@@ -1,4 +1,4 @@
-from repositories.db_models import User
+from repositories.db_models import User, ServiceMapper
 
 
 class TorRepository:
@@ -9,7 +9,7 @@ class TorRepository:
 
     def _create_db_table(self):
         with self._db:
-            self._db.create_tables([User])
+            self._db.create_tables([User, ServiceMapper])
 
     def count_users(self):
         with self._db:
@@ -24,14 +24,14 @@ class TorRepository:
         with self._db:
             for email in emails:
                 if list(User.select().where(User.email == email)):
-                    User.update({"state": state}).where(User.email == emails).execute()
+                    User.update({"state": state}).where(User.email == email).execute()
                 else:
                     invalid_emails.append(email)
             return invalid_emails
 
-    def get_register(self, count):
+    def get_register(self, count, service_number):
         with self._db:
-            return User.select().where(User.state == 1).limit(count)
+            return User.select().join(ServiceMapper).where(User.state == 1).limit(count)
 
     def update_state(self, emails):
         with self._db:

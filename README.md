@@ -1,3 +1,4 @@
+## TOR SERVER
 ### For startup the app:
 1. Install [python 3.9.1+](https://www.python.org/downloads/)
 2. Install pipenv (shell command):
