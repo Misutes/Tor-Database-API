@@ -1,66 +1,65 @@
-import os
-from typing import Optional, List
+import http
+from typing import Any, List
 
 from fastapi import APIRouter, Depends
-from starlette.responses import JSONResponse, FileResponse
+from starlette.responses import Response
 
-from models import UpdatedEmails
-from services.tor_service import get_service, TorService
+from models import UpdateUsersData, User
+from services.tor_service import TorService, get_service
+from services.validation_service import (
+    check_service_field,
+    check_service_value,
+    check_user_token,
+)
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(check_user_token)])
 
 
 def tor_service():
     return get_service()
 
 
+@router.post("/createUsers")
+async def create_users(users: List[User], service: TorService = Depends(tor_service)):
+    await service.creat_users(users)
+    return Response(status_code=http.HTTPStatus.OK, content="Users created")
+
+
 @router.get("/getUsers")
 async def get_users(
-        state: Optional[int] = None,
-        count: Optional[int] = None,
-        service: TorService = Depends(tor_service)
+    where_name: str,
+    fields: List[str] = [],
+    where_value: Any = None,
+    count: int = 1,
+    service: TorService = Depends(tor_service),
 ):
-    result = await service.get_user(state, count)
-    if isinstance(result, list):
-        return result
-    return JSONResponse(
-        status_code=400,
-        content=f"Users with state different '{state}' in db: {result}"
-    )
+    check_service_field(where_name)
+    check_service_value(where_value)
+
+    return await service.get_users(fields, where_name, where_value, count)
 
 
 @router.put("/updateUsers")
 async def update_users(
-        data: UpdatedEmails,
-        service: TorService = Depends(tor_service)
+    update_data: UpdateUsersData, service: TorService = Depends(tor_service)
 ):
-    if data.state not in (0, 1, 2):
-        return JSONResponse(
-            status_code=400,
-            content='invalid state'
-        )
+    check_service_field(update_data.where_field)
+    check_service_value(update_data.where_value)
 
-    msg = "emails were updated"
-    if invalid_emails := await service.update_users(data.emails, data.state):
-        msg = f"emails: {invalid_emails} wasn't updated"
+    check_service_field(update_data.field_name)
+    check_service_value(update_data.field_value)
 
-    return JSONResponse(
-        status_code=200,
-        content=msg
-    )
+    await service.update_users(update_data)
+    return Response(status_code=http.HTTPStatus.OK, content="Users updated")
 
 
 @router.get("/getRegister")
 async def get_register(
-        count: Optional[int] = None,
-        service: TorService = Depends(tor_service)
+    where_name: str,
+    fields: List[str] = [],
+    count: int = 1,
+    service: TorService = Depends(tor_service),
 ):
-    try:
-        return await service.get_register(count)
-    except ValueError:
-        return JSONResponse(
-            status_code=404,
-            content="Users with state '1' not found"
-        )
+    check_service_field(where_name)
 
-
+    return await service.get_users(fields, where_name, None, count)

@@ -1,15 +1,18 @@
 import os
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends
+from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
-from services.tor_service import get_service, TorService
+from services.tor_service import TorService, get_service
+from services.validation_service import check_service_field
 
 router = APIRouter()
-router.mount("/static", StaticFiles(directory="src/routers/frontend/static"), name="static")
+router.mount(
+    "/static", StaticFiles(directory="src/routers/frontend/static"), name="static"
+)
 
 templates = Jinja2Templates(directory="src/routers/frontend/templates")
 
@@ -19,18 +22,19 @@ def tor_service():
 
 
 @router.get("/")
-async def get_page(
-    request: Request
-):
+async def get_page(request: Request):
     return templates.TemplateResponse("main_page.html", {"request": request})
 
 
 @router.get("/file.txt")
 async def get_file(
-        count: int,
-        service_number: str,
-        service: TorService = Depends(tor_service)
+    where_name: str,
+    fields: str,
+    count: int = 1,
+    service: TorService = Depends(tor_service),
 ):
-    path = os.path.join(os.path.abspath(os.path.dirname("src")), 'file.txt')
-    await service.get_file(path, count, service_number)
-    return FileResponse(path, media_type='application/octet-stream')
+    check_service_field(where_name)
+
+    path = os.path.join(os.path.abspath(os.path.dirname("src")), "file.txt")
+    await service.get_file(path, fields, where_name, count)
+    return FileResponse(path, media_type="application/octet-stream")

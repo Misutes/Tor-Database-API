@@ -2,23 +2,25 @@ import logging
 
 import inject
 from fastapi import FastAPI
-from peewee import SqliteDatabase
+from motor.motor_asyncio import AsyncIOMotorClient
 
-
-from routers.tor_router import router as tor_router
+from repositories.mongo_repository import TorRepository
 from routers.frontend_router import router as fe_router
-from repositories.sqlite_repository import TorRepository
+from routers.tor_router import router as tor_router
 from settings import Settings
+from utils.exceptions import set_exceptions_handler
 from utils.util import remove_file
 
 app = FastAPI()
-# set_exception_handler(app)
+set_exceptions_handler(app)
 app.include_router(tor_router)
 app.include_router(fe_router)
 
 
 def config(binder):
-    repo = TorRepository(Settings.DATABASE)
+    engine = AsyncIOMotorClient(Settings.MONGO_ADDRESS)
+    database = engine[Settings.MONGO_DATABASE][Settings.MONGO_COLLECTION]
+    repo = TorRepository(database)
     binder.bind(TorRepository, repo)
 
 

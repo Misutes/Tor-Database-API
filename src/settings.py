@@ -1,13 +1,17 @@
+import fernet
 from dotenv import load_dotenv
 from environs import Env
-from peewee import SqliteDatabase
 
 load_dotenv()
 env = Env()
 
 
 class Settings:
-    DATABASE_PATH = str(env.str("DATABASE_PATH", "\\")).replace("/", "\\")
-    DATABASE_NAME = env.str("DATABASE_NAME", "database.db")
+    MONGO_ADDRESS = env.str("MONGO_ADDRESS")
+    MONGO_DATABASE = env.str("MONGO_DATABASE")
+    MONGO_COLLECTION = env.str("MONGO_COLLECTION")
 
-    DATABASE = SqliteDatabase(f"{DATABASE_PATH}{DATABASE_NAME}")
+    CRYPTO_KEY = env.str("CRYPTO_KEY")
+    ENCRYPTOR = fernet.Fernet(CRYPTO_KEY.encode())
+
+    SECRET_KEY = env.str("SECRET_KEY")
